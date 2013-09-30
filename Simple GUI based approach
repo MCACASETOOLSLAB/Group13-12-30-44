@@ -1,0 +1,127 @@
+import java.io.*;
+import java.awt.event.*;
+import java.awt.*;
+class que extends Frame
+{
+    Label p,c;
+    TextArea t1,t2;
+    Panel p1,p2;
+    int s;
+    que()
+    {
+        super("Producer & consumer Problem");
+        p=new Label("Producer");
+        c=new Label("Consumer");
+        t1=new TextArea();
+        t2=new TextArea();
+        p1=new Panel();
+        p2=new Panel();
+        add(p1,BorderLayout.NORTH);
+        add(p2,BorderLayout.CENTER);
+        addWindowListener(new WindowAdapter()
+        {
+            public void windowClosing(WindowEvent we)
+            {
+                setVisible(false);
+                System.exit(0);
+            }
+        });
+        p1.setLayout(new GridLayout(1,2));
+        p1.add(p);p1.add(c);
+        p2.setLayout(new GridLayout(1,2));
+        p2.add(t1);p2.add(t2);
+
+    }
+
+    int n;
+    boolean value=false;
+    synchronized void get()throws Exception
+    {
+            if(!value)
+            {
+                try
+                {
+                    wait();
+                }
+                catch(Exception e)
+                {
+                }
+            }
+        Thread.sleep(2000);
+        t2.append("get:"+n+"\n");
+        value=false;
+        notify();
+
+    }
+    synchronized  void put(int x)
+    {
+            if(value)
+            {
+                try
+                {
+                    wait();
+                }
+                catch(Exception e1)
+                    {
+                    }
+            }
+            t1.append("put:"+n+"\n");
+            n=x;
+            value=true;
+            notify();
+    }
+}
+class produce implements Runnable
+{
+    que q;
+    produce(que m)
+    {
+        q=m;
+        new Thread(this,"Producer").start();
+    }
+    public void run()
+    {
+        int i=2;
+        try
+        {
+            while(true)
+                q.put(i++);
+        }
+        catch(Exception e2)
+        {
+        }
+    }
+}
+class consumer implements Runnable
+{
+    que q;
+    consumer (que z)
+    {
+        q=z;
+        new Thread(this,"Consumer").start();
+    }
+    public void run()
+    {
+        try
+        {
+            while(true)
+                q.get();
+        }
+        catch(Exception e3)
+        {
+        }
+    }
+}
+class pcf extends Frame
+{
+    que q1=new que();
+    public static void main(String args[])
+    {
+            pcf pc= new pcf();
+            que q1=new que();
+            new produce(q1);
+            new consumer(q1);
+            q1.setVisible(true);
+            q1.setSize(300,400);
+    }
+}
